@@ -1,7 +1,7 @@
 - hosts: localhost
   vars:
-    database_user: "{{ lookup('env','DATABASE_PASS') | default('admin', true) }}"
-    database_pass: "{{ lookup('env','DATABASE_USER') | default('admin', true) }}"
+    database_pass: "{{ lookup('env','DATABASE_PASS') | default('admin', true) }}"
+    database_user: "{{ lookup('env','DATABASE_USER') | default('admin', true) }}"
   tasks:
     - stat: path=/data/db/admin.0
       register: admin_db
@@ -14,7 +14,7 @@
       mongodb_user:
         database: admin
         user: "{{ database_user }}"
-        password:"{{ database_pass }}"
+        password: "{{ database_pass }}"
         state: present
         roles:
           - db: admin
