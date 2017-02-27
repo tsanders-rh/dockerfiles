@@ -1,0 +1,29 @@
+- hosts: localhost
+  vars:
+    database_user: "{{ lookup('env','DATABASE_PASS') | default('admin', true) }}"
+    database_pass: "{{ lookup('env','DATABASE_USER') | default('admin', true) }}"
+  tasks:
+    - stat: path=/data/db/admin.0
+      register: admin_db
+
+    - name: Run mongodb
+      shell: "/usr/bin/mongod &"
+      when: admin_db.stat.exists == False
+
+    - name: configure mongod admin user
+      mongodb_user:
+        database: admin
+        user: "{{ database_user }}"
+        password:"{{ database_pass }}"
+        state: present
+        roles:
+          - db: admin
+            role: userAdminAnyDatabase
+      when: admin_db.stat.exists == False
+
+    - name: Stop mongodb
+      shell: "pkill mongod && sleep 5"
+      when: admin_db.stat.exists == False
+
+    - name: Run mongodb with auth
+      shell: "/usr/bin/mongod --auth"
