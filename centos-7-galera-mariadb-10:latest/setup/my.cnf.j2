@@ -1,0 +1,37 @@
+[client]
+default-character-set = utf8
+
+[mysql]
+default-character-set = utf8
+
+[mysqld]
+bind-address = 0.0.0.0
+binlog_format = ROW
+default-storage-engine = innodb
+innodb_autoinc_lock_mode = 2
+query_cache_size=0
+query_cache_type=0
+
+log-error = /var/lib/mysql/mariadb.log
+datadir = /var/lib/mysql/
+
+# Galera Provider Configuration
+wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+
+# Galera Cluster Configuration
+wsrep_cluster_name = galera
+wsrep_cluster_address = "gcomm://{{wsrep_cluster_addresses}}"
+
+# Galera Node Configuration
+wsrep_node_address = "{{wsrep_node_name}}:4567"
+wsrep_node_name = "{{wsrep_node_name}}"
+
+# Galera Synchronization Congifuration
+wsrep_sst_method = rsync
+wsrep_sst_auth = "root:{{mariadb_root_password}}"
+
+socket = "/var/lib/mysql/mysql.sock"
+
+[server]
+pid-file = /var/lib/mysql/mariadb.pid
+
