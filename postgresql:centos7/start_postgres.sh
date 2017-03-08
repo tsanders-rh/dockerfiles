@@ -5,6 +5,12 @@ DB_USER=${POSTGRES_USER:-}
 DB_PASS=${POSTGRES_PASSWORD:-}
 PG_CONFDIR="/var/lib/pgsql/data"
 
+chown postgres:postgres /var/lib/pgsql/data
+
+if [ ! -f "/var/lib/pgsql/data/PG_VERSION" ] ; then
+  /usr/bin/postgresql-setup initdb
+fi
+
 __create_user() {
   #Grant rights
   usermod -G wheel postgres
