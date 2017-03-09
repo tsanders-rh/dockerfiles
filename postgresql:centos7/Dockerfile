@@ -25,8 +25,6 @@ ADD ./postgresql.conf /var/lib/pgsql/postgresql.conf
 
 RUN chown -v postgres.postgres /var/lib/pgsql/postgresql.conf
 
-RUN echo "host    all             all             0.0.0.0/0               md5" >> /var/lib/pgsql/pg_hba.conf
-
 VOLUME ["/var/lib/pgsql"]
 
 EXPOSE 5432

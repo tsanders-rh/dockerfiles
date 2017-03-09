@@ -7,12 +7,10 @@ PG_CONFDIR="/var/lib/pgsql/data"
 
 chown postgres:postgres /var/lib/pgsql/data
 
-if [ ! -f "/var/lib/pgsql/data/postgresql.conf" ] ; then
-  ln -sf /var/lib/pgsql/postgresql.conf /var/lib/pgsql/data/postgresql.conf
-fi 
-
 if [ ! -f "/var/lib/pgsql/data/PG_VERSION" ] ; then
   /usr/bin/postgresql-setup initdb
+  ln -sf /var/lib/pgsql/postgresql.conf /var/lib/pgsql/data/postgresql.conf
+  echo "host    all             all             0.0.0.0/0               md5" >> /var/lib/pgsql/data/pg_hba.conf
 fi
 
 __create_user() {
