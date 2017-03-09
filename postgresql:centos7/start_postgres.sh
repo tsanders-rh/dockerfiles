@@ -7,6 +7,10 @@ PG_CONFDIR="/var/lib/pgsql/data"
 
 chown postgres:postgres /var/lib/pgsql/data
 
+if [ ! -f "/var/lib/pgsql/data/postgresql.conf" ] ; then
+  ln -sf /var/lib/pgsql/postgresql.conf /var/lib/pgsql/data/postgresql.conf
+fi 
+
 if [ ! -f "/var/lib/pgsql/data/PG_VERSION" ] ; then
   /usr/bin/postgresql-setup initdb
 fi
