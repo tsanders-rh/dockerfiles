@@ -6,4 +6,4 @@ RUN yum update  -y \
     && yum install -y mediawiki123 php-pgsql ImageMagick git php-pecl-apcu php-intl \
     && yum clean all
 
-ENTRYPOINT ["/bin/bash", "-c", "sleep 500m"]
+ENTRYPOINT ["/bin/httpd", "-DFOREGROUND"]
