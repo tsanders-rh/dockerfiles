@@ -10,4 +10,4 @@ COPY mediawiki123.conf /etc/httpd/conf.d/mediawiki123.conf
 
 EXPOSE 80
 
-ENTRYPOINT ["/bin/httpd", "-DFOREGROUND"]
+ENTRYPOINT ["/sbin/httpd", "-DFOREGROUND"]
