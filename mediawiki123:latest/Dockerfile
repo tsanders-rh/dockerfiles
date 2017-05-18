@@ -16,4 +16,4 @@ RUN sed -i -e 's@DocumentRoot "/var/www/.*"@DocumentRoot /var/www/mediawiki123@'
 COPY entrypoint.sh /entrypoint.sh
 EXPOSE 80
 
-ENTRYPOINT ["/sbin/httpd", "-DFOREGROUND"]
+ENTRYPOINT ["/entrypoint.sh"]
