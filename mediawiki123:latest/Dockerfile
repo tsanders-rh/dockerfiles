@@ -10,7 +10,7 @@ RUN curl -sSL -o /bin/dumb-init https://github.com/Yelp/dumb-init/releases/downl
 RUN chmod +x /bin/dumb-init
 
 COPY mediawiki123.conf /etc/httpd/conf.d/mediawiki123.conf
-RUN sed -i -e 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf
+#RUN sed -i -e 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf
 RUN sed -i -e 's@DocumentRoot "/var/www/.*"@DocumentRoot /var/www/mediawiki123@' /etc/httpd/conf/httpd.conf
 
 COPY entrypoint.sh /entrypoint.sh
