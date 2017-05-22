@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# set -e
+set -e
 
 : ${MEDIAWIKI_SITE_NAME:=MediaWiki}
 : ${MEDIAWIKI_SITE_LANG:=en}
@@ -36,27 +36,30 @@ psql -U $MEDIAWIKI_DB_USER -h $MEDIAWIKI_DB_HOST -p $MEDIAWIKI_DB_PORT -tc "SELE
 unset PGPASSWORD
 
 
-# if [ ! -e "LocalSettings.php" -a ! -z "$MEDIAWIKI_SITE_SERVER" ]; then
-# If the container is restarted this will fail because the tables are already created
-# but there won't be a LocalSettings.php
-php /usr/share/mediawiki123/maintenance/install.php \
-  --confpath /var/www/html \
-  --dbname "$MEDIAWIKI_DB_NAME" \
-  --dbschema "MEDIAWIKI_DB_SCHEMA" \
-  --dbport "$MEDIAWIKI_DB_PORT" \
-  --dbserver "$MEDIAWIKI_DB_HOST" \
-  --dbtype "$MEDIAWIKI_DB_TYPE" \
-  --dbuser "$MEDIAWIKI_DB_USER" \
-  --dbpass "$MEDIAWIKI_DB_PASSWORD" \
-  --installdbuser "$MEDIAWIKI_DB_USER" \
-  --installdbpass "$MEDIAWIKI_DB_PASSWORD" \
-  --server "$MEDIAWIKI_SITE_SERVER" \
-  --scriptpath "/var/www/mediawiki123" \
-  --lang "$MEDIAWIKI_SITE_LANG" \
-  --pass "$MEDIAWIKI_ADMIN_PASS" \
-  "$MEDIAWIKI_SITE_NAME" \
-  "$MEDIAWIKI_ADMIN_USER"
-# fi
+if [ ! -e "/persistent/LocalSettings.php" ]; then
+  # If the container is restarted this will fail because the tables are already created
+  # but there won't be a LocalSettings.php
+  php /usr/share/mediawiki123/maintenance/install.php \
+    --confpath /var/www/mediawiki123 \
+    --dbname "$MEDIAWIKI_DB_NAME" \
+    --dbschema "$MEDIAWIKI_DB_SCHEMA" \
+    --dbport "$MEDIAWIKI_DB_PORT" \
+    --dbserver "$MEDIAWIKI_DB_HOST" \
+    --dbtype "$MEDIAWIKI_DB_TYPE" \
+    --dbuser "$MEDIAWIKI_DB_USER" \
+    --dbpass "$MEDIAWIKI_DB_PASSWORD" \
+    --installdbuser "$MEDIAWIKI_DB_USER" \
+    --installdbpass "$MEDIAWIKI_DB_PASSWORD" \
+    --server "$MEDIAWIKI_SITE_SERVER" \
+    --scriptpath "" \
+    --lang "$MEDIAWIKI_SITE_LANG" \
+    --pass "$MEDIAWIKI_ADMIN_PASS" \
+    "$MEDIAWIKI_SITE_NAME" \
+    "$MEDIAWIKI_ADMIN_USER"
+  cp /var/www/mediawiki123/LocalSettings.php /persistent/LocalSettings.php
+else
+  cp /persistent/LocalSettings.php /var/www/mediawiki123/LocalSettings.php
+fi
 
 export MEDIAWIKI_SITE_NAME MEDIAWIKI_DB_HOST MEDIAWIKI_DB_USER MEDIAWIKI_DB_PASSWORD MEDIAWIKI_DB_NAME
 
