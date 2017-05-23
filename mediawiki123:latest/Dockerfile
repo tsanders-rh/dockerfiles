@@ -13,11 +13,11 @@ RUN yum update  -y \
 
 RUN mkdir -p ${BASE_DIR} ${BASE_DIR}/etc \
              && useradd -u ${USER_UID} -r -g 0 -M -d ${BASE_DIR} -b ${BASE_DIR} -s /sbin/nologin -c "www-data user" ${USER_NAME} \
-             && mkdir -p ${BASE_DIR}/httpd/{logs,run,html,conf.d,conf}  \
+             && mkdir -p ${BASE_DIR}/httpd/{logs,run,html,conf}  \
              && cp /etc/httpd/conf/{httpd.conf,magic} ${BASE_DIR}/httpd/conf \
              && cp -R /var/www/mediawiki123 ${BASE_DIR}/httpd/ \
              && cp -R /etc/httpd/conf.modules.d ${BASE_DIR}/httpd/conf.modules.d \
-             && cp -R /etc/httpd/conf.d/ ${BASE_DIR}/httpd/conf.d \
+             && cp -R /etc/httpd/conf.d ${BASE_DIR}/httpd/conf.d \
              && chown -R ${USER_NAME}:0 ${BASE_DIR}/httpd \
              && chmod -R g+rw ${BASE_DIR} /etc/passwd
 
@@ -25,9 +25,10 @@ RUN curl -sSL -o /bin/dumb-init https://github.com/Yelp/dumb-init/releases/downl
 RUN chmod +x /bin/dumb-init
 
 COPY mediawiki123.conf ${BASE_DIR}/httpd/conf.d/mediawiki123.conf
-RUN sed -i -e 's/Listen 80/Listen 127.1.2.3:8080/' ${BASE_DIR}/httpd/conf/httpd.conf
+RUN sed -i -e 's/Listen 80/Listen 8080/' ${BASE_DIR}/httpd/conf/httpd.conf
 RUN sed -i -e "s@ServerRoot \"/etc/httpd\"@ServerRoot ${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
 RUN sed -i -e 's@DocumentRoot "/var/www/.*"@DocumentRoot mediawiki123/@' ${BASE_DIR}/httpd/conf/httpd.conf
+RUN sed -i -e "s@/var/www@${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
 RUN echo "PidFile run/httpd.pid" >> ${BASE_DIR}/httpd/conf/httpd.conf
 RUN echo "DefaultRuntimeDir run/" >> ${BASE_DIR}/httpd/conf/httpd.conf
 RUN ln -s /usr/lib64/httpd/modules/ ${BASE_DIR}/httpd/modules
