@@ -16,9 +16,12 @@ RUN mkdir -p ${BASE_DIR} ${BASE_DIR}/etc \
              && mkdir -p ${BASE_DIR}/httpd/{logs,run,html,conf}  \
              && cp /etc/httpd/conf/{httpd.conf,magic} ${BASE_DIR}/httpd/conf \
              && cp -R /var/www/mediawiki123 ${BASE_DIR}/httpd/ \
+             && mkdir ${BASE_DIR}/tmp \
              && cp -R /etc/httpd/conf.modules.d ${BASE_DIR}/httpd/conf.modules.d \
              && cp -R /etc/httpd/conf.d ${BASE_DIR}/httpd/conf.d \
              && chown -R ${USER_NAME}:0 ${BASE_DIR}/httpd \
+             && chmod 777 ${BASE_DIR}/httpd/mediawiki123/{cache,images} \
+             && chmod 777 ${BASE_DIR}/tmp \
              && chmod -R g+rw ${BASE_DIR} /etc/passwd
 
 COPY mediawiki123.conf ${BASE_DIR}/httpd/conf.d/mediawiki123.conf

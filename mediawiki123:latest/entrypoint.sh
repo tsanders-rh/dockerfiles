@@ -55,9 +55,12 @@ if [ ! -e "/persistent/LocalSettings.php" ] && [ ! -z "${POSTGRESQL_HOST}" ]; th
     --server "http://${MEDIAWIKI_SITE_SERVER}" \
     --lang "$MEDIAWIKI_SITE_LANG" \
     --pass "$MEDIAWIKI_ADMIN_PASS" \
-    "$MEDIAWIKI_SITE_NAME" \
-    "$MEDIAWIKI_ADMIN_USER"
+    "$MEDIAWIKI_ADMIN_USER" \
+    "$MEDIAWIKI_SITE_NAME"
+  echo "session_save_path(\"${BASE_DIR}/tmp\");" >> ${BASE_DIR}/httpd/mediawiki123/LocalSettings.php
+  # echo "\$wgDebugLogFile = \"${BASE_DIR}/tmp/debug.log\";" >> ${BASE_DIR}/httpd/mediawiki123/LocalSettings.php
   cp ${BASE_DIR}/httpd//mediawiki123/LocalSettings.php /persistent/LocalSettings.php
+
 elif [ -e "/persistent/LocalSettings.php" ]; then
   cp /persistent/LocalSettings.php ${BASE_DIR}/httpd//mediawiki123/LocalSettings.php
 fi
