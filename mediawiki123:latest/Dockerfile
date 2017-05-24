@@ -1,19 +1,43 @@
 FROM centos:latest
 MAINTAINER Vessel Maintainers
 
+ENV USER_NAME=www-data \
+    USER_UID=1001 \
+    BASE_DIR=/home/www-data
+ENV HOME=${BASE_DIR}
+
 RUN yum update  -y \
     && yum install -y epel-release \
     && yum install -y mediawiki123 php-pgsql ImageMagick git php-pecl-apcu php-intl postgresql \
     && yum clean all
 
+RUN mkdir -p ${BASE_DIR} ${BASE_DIR}/etc \
+             && useradd -u ${USER_UID} -r -g 0 -M -d ${BASE_DIR} -b ${BASE_DIR} -s /sbin/nologin -c "www-data user" ${USER_NAME} \
+             && mkdir -p ${BASE_DIR}/httpd/{logs,run,html,conf}  \
+             && cp /etc/httpd/conf/{httpd.conf,magic} ${BASE_DIR}/httpd/conf \
+             && cp -R /var/www/mediawiki123 ${BASE_DIR}/httpd/ \
+             && cp -R /etc/httpd/conf.modules.d ${BASE_DIR}/httpd/conf.modules.d \
+             && cp -R /etc/httpd/conf.d ${BASE_DIR}/httpd/conf.d \
+             && chown -R ${USER_NAME}:0 ${BASE_DIR}/httpd \
+             && chmod -R g+rw ${BASE_DIR} /etc/passwd
+
 RUN curl -sSL -o /bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.0.2/dumb-init_1.0.2_amd64
 RUN chmod +x /bin/dumb-init
 
-COPY mediawiki123.conf /etc/httpd/conf.d/mediawiki123.conf
-#RUN sed -i -e 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf
-RUN sed -i -e 's@DocumentRoot "/var/www/.*"@DocumentRoot /var/www/mediawiki123@' /etc/httpd/conf/httpd.conf
+COPY mediawiki123.conf ${BASE_DIR}/httpd/conf.d/mediawiki123.conf
+RUN sed -i -e 's/Listen 80/Listen 8080/' ${BASE_DIR}/httpd/conf/httpd.conf
+RUN sed -i -e "s@ServerRoot \"/etc/httpd\"@ServerRoot ${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
+RUN sed -i -e 's@DocumentRoot "/var/www/.*"@DocumentRoot mediawiki123/@' ${BASE_DIR}/httpd/conf/httpd.conf
+RUN sed -i -e "s@/var/www@${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
+RUN echo "PidFile run/httpd.pid" >> ${BASE_DIR}/httpd/conf/httpd.conf
+RUN echo "DefaultRuntimeDir run/" >> ${BASE_DIR}/httpd/conf/httpd.conf
+RUN ln -s /usr/lib64/httpd/modules/ ${BASE_DIR}/httpd/modules
 
 COPY entrypoint.sh /entrypoint.sh
-EXPOSE 80
+EXPOSE 8080
+
+USER ${USER_UID}
+
+RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > ${BASE_DIR}/etc/passwd.template
 
 ENTRYPOINT ["/entrypoint.sh"]

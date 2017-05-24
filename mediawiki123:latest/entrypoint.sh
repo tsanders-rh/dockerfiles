@@ -2,6 +2,11 @@
 
 #set -e
 
+USER_ID=$(id -u)
+if [ ${USER_UID} != ${USER_ID} ]; then
+  sed "s@${USER_NAME}:x:\${USER_ID}:@${USER_NAME}:x:${USER_ID}:@g" ${BASE_DIR}/etc/passwd.template > /etc/passwd
+fi
+
 : ${MEDIAWIKI_SITE_NAME:=MediaWiki}
 : ${MEDIAWIKI_SITE_LANG:=en}
 : ${MEDIAWIKI_ADMIN_USER:=admin}
@@ -40,7 +45,7 @@ if [ ! -e "/persistent/LocalSettings.php" ]; then
   # If the container is restarted this will fail because the tables are already created
   # but there won't be a LocalSettings.php
   php /usr/share/mediawiki123/maintenance/install.php \
-    --confpath /var/www/mediawiki123 \
+    --confpath ${BASE_DIR}/httpd/mediawiki123 \
     --dbname "$MEDIAWIKI_DB_NAME" \
     --dbschema "$MEDIAWIKI_DB_SCHEMA" \
     --dbport "$MEDIAWIKI_DB_PORT" \
@@ -56,12 +61,11 @@ if [ ! -e "/persistent/LocalSettings.php" ]; then
     --pass "$MEDIAWIKI_ADMIN_PASS" \
     "$MEDIAWIKI_SITE_NAME" \
     "$MEDIAWIKI_ADMIN_USER"
-  cp /var/www/mediawiki123/LocalSettings.php /persistent/LocalSettings.php
+  cp ${BASE_DIR}/httpd//mediawiki123/LocalSettings.php /persistent/LocalSettings.php
 else
-  cp /persistent/LocalSettings.php /var/www/mediawiki123/LocalSettings.php
+  cp /persistent/LocalSettings.php ${BASE_DIR}/httpd//mediawiki123/LocalSettings.php
 fi
 #
-#export MEDIAWIKI_SITE_NAME MEDIAWIKI_DB_HOST MEDIAWIKI_DB_USER MEDIAWIKI_DB_PASSWORD MEDIAWIKI_DB_NAME
+# export MEDIAWIKI_SITE_NAME MEDIAWIKI_DB_HOST MEDIAWIKI_DB_USER MEDIAWIKI_DB_PASSWORD MEDIAWIKI_DB_NAME
 
-/sbin/httpd -DFOREGROUND
-#bash
+/sbin/httpd -DFOREGROUND -f ${BASE_DIR}/httpd/conf/httpd.conf
