@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#set -e
-
 USER_ID=$(id -u)
 if [ ${USER_UID} != ${USER_ID} ]; then
   sed "s@${USER_NAME}:x:\${USER_ID}:@${USER_NAME}:x:${USER_ID}:@g" ${BASE_DIR}/etc/passwd.template > /etc/passwd
@@ -13,8 +11,6 @@ fi
 : ${MEDIAWIKI_ADMIN_PASS:=rosebud}
 : ${MEDIAWIKI_DB_TYPE:=postgres}
 : ${MEDIAWIKI_DB_SCHEMA:=wiki}
-# : ${MEDIAWIKI_ENABLE_SSL:=false}
-# : ${MEDIAWIKI_UPDATE:=false}
 
 #if [ -z "$MEDIAWIKI_DB_HOST" -a -z "$MEDIAWIKI_DB_PORT" ]; then
 #    echo >&2 'error: missing MEDIAWIKI_DB_HOST|MEDIAWIKI_DB_PORT environment variable'
@@ -41,20 +37,20 @@ fi
 #unset PGPASSWORD
 #
 #
-if [ ! -e "/persistent/LocalSettings.php" ]; then
+if [ ! -e "/persistent/LocalSettings.php" ] && [ ! -z "${POSTGRESQL_HOST}" ]; then
   # If the container is restarted this will fail because the tables are already created
   # but there won't be a LocalSettings.php
   php /usr/share/mediawiki123/maintenance/install.php \
     --confpath ${BASE_DIR}/httpd/mediawiki123 \
-    --dbname "$MEDIAWIKI_DB_NAME" \
+    --dbname "$POSTGRESQL_DATABASE" \
     --dbschema "$MEDIAWIKI_DB_SCHEMA" \
-    --dbport "$MEDIAWIKI_DB_PORT" \
-    --dbserver "$MEDIAWIKI_DB_HOST" \
+    --dbport "$POSTGRESQL_PORT" \
+    --dbserver "$POSTGRESQL_HOST" \
     --dbtype "$MEDIAWIKI_DB_TYPE" \
-    --dbuser "$MEDIAWIKI_DB_USER" \
-    --dbpass "$MEDIAWIKI_DB_PASSWORD" \
-    --installdbuser "$MEDIAWIKI_DB_USER" \
-    --installdbpass "$MEDIAWIKI_DB_PASSWORD" \
+    --dbuser "$POSTGRESQL_USER" \
+    --dbpass "$POSTGRESQL_PASSWORD" \
+    --installdbuser "$POSTGRESQL_USER" \
+    --installdbpass "$POSTGRESQL_PASSWORD" \
     --scriptpath "" \
     --server "http://${MEDIAWIKI_SITE_SERVER}" \
     --lang "$MEDIAWIKI_SITE_LANG" \
@@ -62,10 +58,8 @@ if [ ! -e "/persistent/LocalSettings.php" ]; then
     "$MEDIAWIKI_SITE_NAME" \
     "$MEDIAWIKI_ADMIN_USER"
   cp ${BASE_DIR}/httpd//mediawiki123/LocalSettings.php /persistent/LocalSettings.php
-else
+elif [ -e "/persistent/LocalSettings.php" ]; then
   cp /persistent/LocalSettings.php ${BASE_DIR}/httpd//mediawiki123/LocalSettings.php
 fi
-#
-# export MEDIAWIKI_SITE_NAME MEDIAWIKI_DB_HOST MEDIAWIKI_DB_USER MEDIAWIKI_DB_PASSWORD MEDIAWIKI_DB_NAME
 
 /sbin/httpd -DFOREGROUND -f ${BASE_DIR}/httpd/conf/httpd.conf

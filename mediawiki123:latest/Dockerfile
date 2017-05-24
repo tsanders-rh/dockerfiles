@@ -22,10 +22,11 @@ RUN mkdir -p ${BASE_DIR} ${BASE_DIR}/etc \
              && chmod -R g+rw ${BASE_DIR} /etc/passwd
 
 COPY mediawiki123.conf ${BASE_DIR}/httpd/conf.d/mediawiki123.conf
-RUN sed -i -e 's/Listen 80/Listen 8080/' ${BASE_DIR}/httpd/conf/httpd.conf
-RUN sed -i -e "s@ServerRoot \"/etc/httpd\"@ServerRoot ${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
-RUN sed -i -e 's@DocumentRoot "/var/www/.*"@DocumentRoot mediawiki123/@' ${BASE_DIR}/httpd/conf/httpd.conf
-RUN sed -i -e "s@/var/www@${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
+RUN sed -i -e 's/Listen 80/Listen 8080/' \
+           -e "s@ServerRoot \"/etc/httpd\"@ServerRoot ${BASE_DIR}/httpd@" \
+           -e 's@DocumentRoot "/var/www/.*"@DocumentRoot mediawiki123/@' \
+           -e "s@/var/www@${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
+
 RUN echo "PidFile run/httpd.pid" >> ${BASE_DIR}/httpd/conf/httpd.conf
 RUN echo "DefaultRuntimeDir run/" >> ${BASE_DIR}/httpd/conf/httpd.conf
 RUN ln -s /usr/lib64/httpd/modules/ ${BASE_DIR}/httpd/modules
