@@ -21,9 +21,6 @@ RUN mkdir -p ${BASE_DIR} ${BASE_DIR}/etc \
              && chown -R ${USER_NAME}:0 ${BASE_DIR}/httpd \
              && chmod -R g+rw ${BASE_DIR} /etc/passwd
 
-RUN curl -sSL -o /bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.0.2/dumb-init_1.0.2_amd64
-RUN chmod +x /bin/dumb-init
-
 COPY mediawiki123.conf ${BASE_DIR}/httpd/conf.d/mediawiki123.conf
 RUN sed -i -e 's/Listen 80/Listen 8080/' ${BASE_DIR}/httpd/conf/httpd.conf
 RUN sed -i -e "s@ServerRoot \"/etc/httpd\"@ServerRoot ${BASE_DIR}/httpd@" ${BASE_DIR}/httpd/conf/httpd.conf
