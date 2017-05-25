@@ -37,7 +37,7 @@ unset PGPASSWORD
 
 
 if [ -d "$MEDIAWIKI_SHARED" ]; then
-  if [ ! -e "$MEDIAWIKI_SHARED/LocalSettings.php" ] && [ ! -z "${POSTGRESQL_HOST}" ]
+  if [ ! -e "$MEDIAWIKI_SHARED/LocalSettings.php" ] && [ ! -z "${POSTGRESQL_HOST}" ]; then
     # If the container is restarted this will fail because the tables are already created
     # but there won't be a LocalSettings.php
     php /usr/share/mediawiki123/maintenance/install.php \
