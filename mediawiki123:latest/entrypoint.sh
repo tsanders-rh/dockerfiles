@@ -16,27 +16,23 @@ fi
 
 : ${MEDIAWIKI_SHARED:=/persistent}
 
-if [ -z "$MEDIAWIKI_DB_HOST" -a -z "$MEDIAWIKI_DB_PORT" ]; then
+if [ -z "$POSTGRESQL_HOST" -a -z "$POSTGRESQL_PORT" ]; then
     echo >&2 'error: missing MEDIAWIKI_DB_HOST|MEDIAWIKI_DB_PORT environment variable'
     exit 1
 fi
 
 
-: ${MEDIAWIKI_DB_USER:=postgres}
-if [ "$MEDIAWIKI_DB_USER" = 'root' ]; then
-    : ${MEDIAWIKI_DB_PASSWORD:=$ROOT_PASSWORD}
-fi
-: ${MEDIAWIKI_DB_NAME:=mediawiki}
+: ${POSTGRESQL_USER:=postgres}
+: ${POSTGRESQL_DATABASE:=mediawiki}
 
-if [ -z "$MEDIAWIKI_DB_PASSWORD" ]; then
-    echo >&2 'error: missing required MEDIAWIKI_DB_PASSWORD environment variable'
-    echo >&2 '  Did you forget to -e MEDIAWIKI_DB_PASSWORD=... ?'
+if [ -z "$POSTGRESQL_PASSWORD" ]; then
+    echo >&2 'error: missing required POSTGRESQL_PASSWORD environment variable'
+    echo >&2 '  Did you forget to -e POSTGRESQL_PASSWORD=... ?'
     exit 1
 fi
 
-export PGPASSWORD=$MEDIAWIKI_DB_PASSWORD
-psql -U $MEDIAWIKI_DB_USER -h $MEDIAWIKI_DB_HOST -p $MEDIAWIKI_DB_PORT -tc "SELECT 1 FROM pg_database WHERE datname = '$MEDIAWIKI_DB_NAME'" | grep -q 1 || (echo "$MEDIAWIKI_DB_NAME does not exist" && exit)
-
+export PGPASSWORD=$POSTGRESQL_PASSWORD
+psql -U $POSTGRESQL_USER -h $POSTGRESQL_HOST -p $POSTGRESQL_PORT -tc "SELECT 1 FROM pg_database WHERE datname = '$POSTGRESQL_DATABASE'" | grep -q 1 || (echo "$POSTGRESQL_DATABASE does not exist" && exit)
 unset PGPASSWORD
 
 
