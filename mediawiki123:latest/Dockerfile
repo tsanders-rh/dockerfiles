@@ -8,7 +8,7 @@ ENV HOME=${BASE_DIR}
 
 RUN yum update  -y \
     && yum install -y epel-release \
-    && yum install -y mediawiki123 php-pgsql ImageMagick git php-pecl-apcu php-intl postgresql \
+    && yum install -y mediawiki123 php-pgsql ImageMagick git php-pecl-apcu php-intl postgresql mediawiki-container-scripts \
     && yum clean all
 
 RUN mkdir -p ${BASE_DIR} ${BASE_DIR}/etc \
@@ -22,9 +22,10 @@ RUN mkdir -p ${BASE_DIR} ${BASE_DIR}/etc \
              && chown -R ${USER_NAME}:0 ${BASE_DIR}/httpd \
              && chmod 777 ${BASE_DIR}/httpd/mediawiki123/{cache,images} \
              && chmod 777 ${BASE_DIR}/tmp \
-             && chmod -R g+rw ${BASE_DIR} /etc/passwd
+             && chmod -R g+rw ${BASE_DIR} /etc/passwd \
+             && cp /usr/share/mediawiki-container-scripts/mediawiki123.conf.example \
+                ${BASE_DIR}/httpd/conf.d/mediawiki123.conf
 
-COPY mediawiki123.conf ${BASE_DIR}/httpd/conf.d/mediawiki123.conf
 RUN sed -i -e 's/Listen 80/Listen 8080/' \
            -e "s@ServerRoot \"/etc/httpd\"@ServerRoot ${BASE_DIR}/httpd@" \
            -e 's@DocumentRoot "/var/www/.*"@DocumentRoot mediawiki123/@' \
@@ -34,11 +35,10 @@ RUN echo "PidFile run/httpd.pid" >> ${BASE_DIR}/httpd/conf/httpd.conf
 RUN echo "DefaultRuntimeDir run/" >> ${BASE_DIR}/httpd/conf/httpd.conf
 RUN ln -s /usr/lib64/httpd/modules/ ${BASE_DIR}/httpd/modules
 
-COPY entrypoint.sh /entrypoint.sh
 EXPOSE 8080
 
 USER ${USER_UID}
 
 RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > ${BASE_DIR}/etc/passwd.template
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]
