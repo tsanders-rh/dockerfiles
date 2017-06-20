@@ -11,28 +11,9 @@ fi
 : ${MEDIAWIKI_ADMIN_PASS:=rosebud}
 : ${MEDIAWIKI_DB_TYPE:=postgres}
 : ${MEDIAWIKI_DB_SCHEMA:=wiki}
-
 : ${MEDIAWIKI_SHARED:=/persistent}
-
-if [ -z "$POSTGRESQL_HOST" -a -z "$POSTGRESQL_PORT" ]; then
-    echo >&2 'error: missing MEDIAWIKI_DB_HOST|MEDIAWIKI_DB_PORT environment variable'
-    exit 1
-fi
-
-
 : ${POSTGRESQL_USER:=postgres}
 : ${POSTGRESQL_DATABASE:=mediawiki}
-
-if [ -z "$POSTGRESQL_PASSWORD" ]; then
-    echo >&2 'error: missing required POSTGRESQL_PASSWORD environment variable'
-    echo >&2 '  Did you forget to -e POSTGRESQL_PASSWORD=... ?'
-    exit 1
-fi
-
-export PGPASSWORD=$POSTGRESQL_PASSWORD
-psql -U $POSTGRESQL_USER -h $POSTGRESQL_HOST -p $POSTGRESQL_PORT -tc "SELECT 1 FROM pg_database WHERE datname = '$POSTGRESQL_DATABASE'" | grep -q 1 || (echo "$POSTGRESQL_DATABASE does not exist" && exit)
-unset PGPASSWORD
-
 
 LOCAL_SETTINGS=${BASE_DIR}/httpd/mediawiki123/LocalSettings.php
 IMAGE_DIR=${BASE_DIR}/httpd/mediawiki123/images
