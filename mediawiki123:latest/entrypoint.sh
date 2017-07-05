@@ -12,6 +12,7 @@ fi
 : ${MEDIAWIKI_DB_TYPE:=postgres}
 : ${MEDIAWIKI_DB_SCHEMA:=wiki}
 : ${MEDIAWIKI_SHARED:=/persistent}
+: ${MEDIAWIKI_LOGO:=$wgStylePath/common/images/wiki.png}
 : ${POSTGRESQL_USER:=postgres}
 : ${POSTGRESQL_DATABASE:=mediawiki}
 
@@ -41,6 +42,7 @@ if [ -d "$MEDIAWIKI_SHARED" ]; then
     echo "session_save_path(\"${BASE_DIR}/tmp\");" >> $LOCAL_SETTINGS
     sed -i -e "s/\$wgEnableUploads = false;/\$wgEnableUploads = true;/" $LOCAL_SETTINGS
     sed -i -e "s/#\$wgHashedUploadDirectory = false;/\$wgHashedUploadDirectory = true;/" $LOCAL_SETTINGS
+    sed -i -e '/$wgLogo/c\$wgLogo = '$MEDIAWIKI_LOGO'' $LOCAL_SETTINGS
     grep -q -F "\$wgUploadDirectory" "$LOCAL_SETTINGS" || (echo "\$wgUploadDirectory = \"$IMAGE_DIR\";" >> $LOCAL_SETTINGS)
 
     mv $LOCAL_SETTINGS $MEDIAWIKI_SHARED/LocalSettings.php
